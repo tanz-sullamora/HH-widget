@@ -1,0 +1,91 @@
+.hhWidget {
+	display: block;
+	border: 2px solid #ccc;
+	background-color: #fff;
+	padding: 2px 5px;
+	width: 200px;
+	height: 300px;
+	position: relative;
+	overflow: hidden;
+	color: #666;
+}
+	.hhWidget.noSearch {
+		height: 175px;
+	}
+
+	.hhWidget form {
+		margin: 0;
+		padding: 0;
+	}
+
+	.hhWidget span.hhWidgetHeader {
+		display: block;
+		font-weight: bold;
+		font-size: 1.2em;
+		color: #c00;
+		text-align: center;
+	}
+	
+	.hhWidget a {
+		color: #076CC7;
+		text-decoration: underline;
+	}
+	
+	.hhWidget a:hover {
+		color: #c00;
+		text-decoration: none;
+	}
+
+	.hhWidget p {
+		margin: 0 0 0.5em 0;
+		padding: 0;
+	}
+		.hhWidget p.hhWidgetAddress {
+			color: #999;
+			font-size: 0.9em;
+		}
+	
+	.hhWidget .vacancyScroll {
+		overflow: hidden;
+		margin: 5px auto;
+	}
+	
+	.hhWidget .vacancyScroll > ul {
+		margin: 0;
+		padding: 0;
+		width: 9999px;
+		list-style: none;
+	}
+		.hhWidget .vacancyScroll > ul > li {
+			margin: 0;
+			padding: 0;
+			float: left;
+			width: 200px;
+		}
+	
+	.hhWidget .hhWidgetSearch {
+		width: 200px;
+		position: absolute;
+		bottom: 0;
+	}
+		.hhWidget .hhWidgetSearch input,
+		.hhWidget .hhWidgetSearch select {
+			margin-bottom: 4px;
+		}
+
+		.hhWidget input.hhWidgetText {
+			padding: 2px;
+			width: 194px;
+		}
+		
+		.hhWidget input.hhWidgetSalary {
+			width: 160px;
+		}
+		
+		.hhWidget select.hhWidgetSelect {
+			width: 100%;
+		}
+		
+		.hhWidget input.hhWidgetButton {
+			float: right;
+		}
