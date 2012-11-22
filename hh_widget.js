@@ -11,6 +11,7 @@ function hhWidget(elementName, options) {
 		animate: true,
 		search: true,
 		limit: 5,
+		region: 113, // Россия
 	};
 	
 	this.init = function(elementName, options) {
@@ -37,7 +38,7 @@ function hhWidget(elementName, options) {
 			this._attachScript('field/all', '_parseField');
 		}
 
-		this._attachScript('vacancy/search', '_parseVacancies', {'items': this.options.limit, 'period': 1, 'sort': 2});
+		this._attachScript('vacancy/search', '_parseVacancies', {'items': this.options.limit, 'region': this.options.region, 'period': 1, 'sort': 2});
 		
 		this.prepareForm();
 	};
@@ -138,7 +139,7 @@ function hhWidget(elementName, options) {
 		form.submit.setAttribute('disabled', 'disabled');
 		form.submit.setAttribute('value', 'Идёт поиск…');
 		
-		this._attachScript('vacancy/search', '_parseSearch', {'field': searchField, 'salary': searchSalary, 'onlysalary': searchOnlySalary, 'employment': searchEmployment, 'text': searchText, 'currency': 'RUR', 'items': this.options.limit, 'sort': 2});
+		this._attachScript('vacancy/search', '_parseSearch', {'field': searchField, 'salary': searchSalary, 'onlysalary': searchOnlySalary, 'employment': searchEmployment, 'text': searchText, 'currency': 'RUR', 'items': this.options.limit, 'region': this.options.region, 'sort': 2});
 	};
 	
 
