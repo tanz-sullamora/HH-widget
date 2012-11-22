@@ -4,10 +4,10 @@ function hhWidget(elementName, options) {
 	var tm = 0;
 	this._element = null;
 	this._basicUrl = 'http://api.hh.ru/1/json/';
-	this._basicTemplate = '<!-- caption --> <!-- vacanciesList --> <div class="hhWidgetSearch"><form><!-- inputSearch --> <!-- fieldSelect --> <!-- employmentSelect --> <!-- inputSalary --> <!-- searchButton --></form></div>';
+	this._basicTemplate = '<!-- caption --> <div class="hhWidgetVacanciesList"><!-- vacanciesList --></div><div class="hhWidgetSearch"><form><!-- inputSearch --> <!-- fieldSelect --> <!-- employmentSelect --> <!-- inputSalary --> <!-- searchButton --></form></div>';
 	this._iframe = null;
 	this.options = {
-		caption: 'Вакансии HeadHunter',
+		caption: 'Вакансии',
 		animate: true,
 		search: true,
 		limit: 5,
@@ -42,16 +42,25 @@ function hhWidget(elementName, options) {
 		this.prepareForm();
 	};
 
+
+	function _(elementType, options) {
+		var item = document.createElement(elementType);
+		if (options) {
+			for (var o in options) {
+				item.setAttribute(o, options[o]);
+			}
+		}
+		
+		return item;
+	}
+
 	
 	this._attachScript = function(url, callback, _params) {
 		var params = ['callback=hhWidget.' + callback];
 		for (var p in _params) {
 			params.push(p + '=' + _params[p]);
 		}		
-		var script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		script.setAttribute('charset', 'utf-8');
-		script.setAttribute('src', this._basicUrl + url + '/?' + params.join('&'));
+		var script = _('script', {type: 'text/javascript', charset: 'utf-8', src: this._basicUrl + url + '/?' + params.join('&')});
 		this._iframe.appendChild(script);
 	};
 
@@ -59,13 +68,6 @@ function hhWidget(elementName, options) {
 	this.prepare = function(template, data, _el) {
 		var replaceElement = _el || this._element;
 		replaceElement.innerHTML = replaceElement.innerHTML.replace(new RegExp('<!-- ' + template + ' -->', 'g'), data);
-		
-		var form = this._element.getElementsByTagName('form').item(0);
-		if (form.addEventListener) {
-			form.addEventListener('submit', function (e) { e.preventDefault(); hh.search.call(hh) });
-		} else if (form.attachEvent) {
-			form.attachEvent('onsubmit', function (e) { e.returnValue = false; hh.search.call(hh) } );
-		}
 	}
 	
 	
@@ -74,35 +76,30 @@ function hhWidget(elementName, options) {
 			this._element.className += ' noSearch';
 			this._element.innerHTML = this._element.innerHTML.replace(/<!-- startSearch -->.*<!-- endSearch -->/g, '');
 		} else {
+			var form = this._element.getElementsByTagName('form').item(0);
+			if (form.addEventListener) {
+				form.addEventListener('submit', function (e) { e.preventDefault(); hh.search.call(hh) });
+			} else if (form.attachEvent) {
+				form.attachEvent('onsubmit', function (e) { e.returnValue = false; hh.search.call(hh) } );
+			}
+		
 			var container = document.createElement('div');
-			var item = document.createElement('input');
-			item.setAttribute('type', 'text');
-			item.setAttribute('name', 'text');
-			item.setAttribute('class', 'hhWidgetText');
-			item.setAttribute('placeholder', 'Вакансия');
+			var item = _('input', {type: 'text', name: 'text', 'class': 'hhWidgetText', placeholder: 'Вакансия'});
 			container.appendChild(item);
-			this.prepare('inputSearch', container.innerHTML);
+			this.prepare('inputSearch', container.innerHTML, form);
 
 			container.innerHTML = '';
-			var item = document.createElement('input');
-			item.setAttribute('type', 'text');
-			item.setAttribute('name', 'salary');
-			item.setAttribute('class', 'hhWidgetSalary');
-			item.setAttribute('placeholder', 'Зарплата');
+			var item = _('input', {type: 'text', name: 'salary', 'class': 'hhWidgetSalary', placeholder: 'Зарплата'});
 			container.appendChild(item);
-			var item = document.createElement('span');
+			var item = _('span');
 			item.innerHTML = '&nbsp;руб.';
 			container.appendChild(item);
-			this.prepare('inputSalary', container.innerHTML);
+			this.prepare('inputSalary', container.innerHTML, form);
 			
 			container.innerHTML = '';
-			var item = document.createElement('input');
-			item.setAttribute('type', 'submit');
-			item.setAttribute('name', 'submit');
-			item.setAttribute('class', 'hhWidgetButton');
-			item.setAttribute('value', 'Найти');
+			var item = _('input', {type: 'submit', name: 'submit', 'class': 'hhWidgetButton', value: 'Найти'});
 			container.appendChild(item);
-			this.prepare('searchButton', container.innerHTML);
+			this.prepare('searchButton', container.innerHTML, form);
 		}
 	};
 	
@@ -127,7 +124,7 @@ function hhWidget(elementName, options) {
 		form.submit.setAttribute('disabled', 'disabled');
 		form.submit.setAttribute('value', 'Идёт поиск…');
 		
-		this._attachScript('vacancy/search', '_parseSearch', {'field': searchField, 'salary': searchSalary, 'onlysalary': searchOnlySalary, 'employment': searchEmployment, 'text': searchText, 'currency': 'RUR', 'items': 10, 'sort': 2});
+		this._attachScript('vacancy/search', '_parseSearch', {'field': searchField, 'salary': searchSalary, 'onlysalary': searchOnlySalary, 'employment': searchEmployment, 'text': searchText, 'currency': 'RUR', 'items': this.options.limit, 'sort': 2});
 	};
 	
 
@@ -142,17 +139,20 @@ function hhWidget(elementName, options) {
 		clearInterval(m);
 		clearInterval(tm);
 
-		this._element.innerHTML = this._element.innerHTML.replace(/<!-- startVacancy -->.*<!-- endVacancy -->/, '<!-- vacanciesList -->');
+		var els = this._element.getElementsByTagName('div');
+		for (var i = 0; i < els.length; i++) {
+			if (els[i].className == 'hhWidgetVacanciesList') {
+				els[i].innerHTML = els[i].innerHTML.replace(/<!-- startVacancy -->.*<!-- endVacancy -->/, '<!-- vacanciesList -->');
+			}
+		}
 
 		this._parseVacancies(response);
 	};
 
 	
 	this._parseEmployment = function(response) {
-		var container = document.createElement('div');
-		var item = document.createElement('select');
-		item.setAttribute('class', 'hhWidgetSelect');
-		item.setAttribute('name', 'employment');
+		var container = _('div');
+		var item = _('select', {'class': 'hhWidgetSelect', name: 'employment'});
 		var options = '';
 		for (var i = 0; i < response.length; i++) {
 			options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
@@ -161,14 +161,13 @@ function hhWidget(elementName, options) {
 		container.appendChild(item);
 		
 		this.prepare('fieldSelect', container.innerHTML);
+		this.prepareForm();
 	};
 
 	
 	this._parseField = function(response) {
-		var container = document.createElement('div');
-		var item = document.createElement('select');
-		item.setAttribute('class', 'hhWidgetSelect');
-		item.setAttribute('name', 'field');
+		var container = _('div');
+		var item = _('select', {'class': 'hhWidgetSelect', name: 'field'});
 		var options = '';
 		for (var i = 0; i < response.length; i++) {
 			options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
@@ -177,67 +176,91 @@ function hhWidget(elementName, options) {
 		container.appendChild(item);
 		
 		this.prepare('employmentSelect', container.innerHTML);
+		this.prepareForm();
 	};
 
 	
 	this._parseVacancies = function(response) {
-		response = response.vacancies;
+		var found = response.found;
+		var response = response.vacancies;
 		var vacancyTemplate = '<li><p><!-- vacancyName --></p> <p><!-- vacancySalary --></p> <p class="hhWidgetAddress"><!-- vacancyAddress --></p></li>';
 		
 		var html = '';
-		var item = document.createElement('div');
+		var item = _('div');
 
-		var container = document.createElement('div');
-		for (var i = 0; i < response.length; i++) {
-			item.innerHTML = vacancyTemplate;
-			container.innerHTML = '';
+		var container = _('div');
+		if (response) {
+			for (var i = 0; i < response.length; i++) {
+				item.innerHTML = vacancyTemplate;
+				container.innerHTML = '';
 
-			var link = document.createElement('a');
-			link.setAttribute('href', response[i].links.alternate.href);
-			link.innerHTML = response[i].name;
+				var link = _('a', {href: response[i].links.alternate.href});
+				link.innerHTML = response[i].name;
 
-			container.appendChild(link);
-			this.prepare('vacancyName', container.innerHTML, item);
-			container.innerHTML = '';
-			
-			var salary = document.createElement('span');
-			if (response[i].salary) {
-				var currency = ' руб.';
-				if (response[i].salary.currency) {
-					currency = ' ' + response[i].salary.currency.name;
+				container.appendChild(link);
+				this.prepare('vacancyName', container.innerHTML, item);
+				container.innerHTML = '';
+				
+				var salary = _('span');
+				if (response[i].salary) {
+					var currency = ' руб.';
+					if (response[i].salary.currency) {
+						currency = ' ' + response[i].salary.currency.name;
+					}
+					if (response[i].salary.from) {
+						salary.innerHTML = 'От ' + response[i].salary.from + currency;
+					}
+					if (response[i].salary.to) {
+						salary.innerHTML += ' до ' + response[i].salary.to + currency;
+					}
+				} else {
+					salary.innerHTML = 'Размер заработной платы не указан';
 				}
-				if (response[i].salary.from) {
-					salary.innerHTML = 'От ' + response[i].salary.from + currency;
-				}
-				if (response[i].salary.to) {
-					salary.innerHTML += ' до ' + response[i].salary.to + currency;
-				}
-			} else {
-				salary.innerHTML = 'Размер заработной платы не указан';
-			}
-			
-			container.appendChild(salary);
-			this.prepare('vacancySalary', container.innerHTML, item);
-			container.innerHTML = '';
-			
-			var address = document.createElement('span');
-			if (response[i].address) {
-				var adr = [response[i].address.city, response[i].address.street, response[i].address.building];
-				address.innerHTML = adr.join(', ');
-			} else {
+				
+				container.appendChild(salary);
+				this.prepare('vacancySalary', container.innerHTML, item);
+				container.innerHTML = '';
+				
+				var address = _('span');
 				address.innerHTML = response[i].region.name;
-			}
-			
-			container.appendChild(address);
-			this.prepare('vacancyAddress', container.innerHTML, item);
+				if (response[i].address) {
+					var adr = [];
+					if (response[i].address.city && response[i].address.city.toSource() != '({})') {
+						adr.push(response[i].address.city);
+					}
+					if (response[i].address.street && response[i].address.street.toSource() != '({})') {
+						adr.push(response[i].address.street);
+					}
+					if (response[i].address.building && response[i].address.building.toSource() != '({})') {
+						adr.push(response[i].address.building);
+					}
+					if (adr.length > 0) {
+						address.innerHTML = adr.join(', ');
+					}
+				}
+				
+				container.appendChild(address);
+				this.prepare('vacancyAddress', container.innerHTML, item);
 
-			html += item.innerHTML;
+				html += item.innerHTML;
+			}
 		}
 
 		var vacanciesElementId = 'hh-scroll' + (new Date().getTime());
-		this.prepare('vacanciesList', '<!-- startVacancy --><div class="vacancyScroll" id="' + vacanciesElementId + '"><ul>' + html + '</ul></div><!-- endVacancy -->');
+		
+		var els = this._element.getElementsByTagName('div');
+		for (var i = 0; i < els.length; i++) {
+			if (els[i].className == 'hhWidgetVacanciesList') {
+				this.prepare('vacanciesList', '<!-- startVacancy --><div class="vacancyScroll" id="' + vacanciesElementId + '"><ul>' + html + '</ul></div><!-- vacanciesFound --><!-- endVacancy -->', els[i]);
+				var container = _('div');
+				var item = _('span', {'class': 'hhWidgetFound'});
+				item.innerHTML = found > 0 ? 'Показано ' + response.length + ' из ' + found : 'Ничего не найдено';
+				container.appendChild(item);
+				this.prepare('vacanciesFound', container.innerHTML, els[i]);
+			}
+		}
 
-		if (response.length > 0 && this.options.animate) {
+		if (response && response.length > 0 && this.options.animate) {
 			var carouselItem = document.getElementById(vacanciesElementId);
 			var ul = carouselItem.getElementsByTagName('ul').item(0);
 			var limit = 200;

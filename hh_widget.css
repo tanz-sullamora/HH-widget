@@ -2,15 +2,27 @@
 	display: block;
 	border: 2px solid #ccc;
 	background-color: #fff;
-	padding: 2px 5px;
+	padding: 10px 5px 2px 5px;
 	width: 200px;
-	height: 300px;
+	min-height: 300px;
 	position: relative;
-	overflow: hidden;
 	color: #666;
+	border-radius: 4px;
 }
+
+	.hhWidget:before {
+		background: url(http://hh.ru/ichameleon/00181.png) no-repeat;
+		display: block;
+		position: absolute;
+		width: 100px;
+		height: 66px;
+		content: "";
+		left: -20px;
+		top: -20px;
+	}
+
 	.hhWidget.noSearch {
-		height: 175px;
+		min-height: 175px;
 	}
 
 	.hhWidget form {
@@ -22,8 +34,9 @@
 		display: block;
 		font-weight: bold;
 		font-size: 1.2em;
-		color: #c00;
-		text-align: center;
+		color: #000;
+		text-align: right;
+		padding: 0 5px 0 80px;
 	}
 	
 	.hhWidget a {
@@ -47,25 +60,34 @@
 	
 	.hhWidget .vacancyScroll {
 		overflow: hidden;
-		margin: 5px auto;
+		margin: 10px auto 5px auto;
+		background-color: #efefef;
 	}
 	
-	.hhWidget .vacancyScroll > ul {
-		margin: 0;
-		padding: 0;
-		width: 9999px;
-		list-style: none;
-	}
-		.hhWidget .vacancyScroll > ul > li {
+		.hhWidget .vacancyScroll > ul {
 			margin: 0;
 			padding: 0;
-			float: left;
-			width: 200px;
+			width: 9999px;
+			list-style: none;
+		}
+			.hhWidget .vacancyScroll > ul > li {
+				margin: 0;
+				padding: 2px 5px;
+				float: left;
+				width: 200px;
+			}
+
+		.hhWidget span.hhWidgetFound {
+			display: block;
+			font-size: 0.8em;
+			color: #c00;
+			text-align: right;
+			margin: -2px 0 10px 0;
 		}
 	
 	.hhWidget .hhWidgetSearch {
 		width: 200px;
-		position: absolute;
+		position: relative;
 		bottom: 0;
 	}
 		.hhWidget .hhWidgetSearch input,
