@@ -53,6 +53,15 @@ function hhWidget(elementName, options) {
 		
 		return item;
 	}
+	
+	function isEmpty(obj) {
+		for(var prop in obj) {
+			if(obj.hasOwnProperty(prop))
+				return false;
+		}
+
+		return true;
+	}
 
 	
 	this._attachScript = function(url, callback, _params) {
@@ -153,11 +162,12 @@ function hhWidget(elementName, options) {
 	this._parseEmployment = function(response) {
 		var container = _('div');
 		var item = _('select', {'class': 'hhWidgetSelect', name: 'employment'});
-		var options = '';
 		for (var i = 0; i < response.length; i++) {
-			options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+			var option = _('option');
+			option.value = response[i].id;
+			option.text = response[i].name;
+			item.appendChild(option);
 		}
-		item.innerHTML = options;
 		container.appendChild(item);
 		
 		this.prepare('fieldSelect', container.innerHTML);
@@ -168,11 +178,12 @@ function hhWidget(elementName, options) {
 	this._parseField = function(response) {
 		var container = _('div');
 		var item = _('select', {'class': 'hhWidgetSelect', name: 'field'});
-		var options = '';
 		for (var i = 0; i < response.length; i++) {
-			options += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+			var option = _('option');
+			option.value = response[i].id;
+			option.text = response[i].name;
+			item.appendChild(option);
 		}
-		item.innerHTML = options;
 		container.appendChild(item);
 		
 		this.prepare('employmentSelect', container.innerHTML);
@@ -225,13 +236,13 @@ function hhWidget(elementName, options) {
 				address.innerHTML = response[i].region.name;
 				if (response[i].address) {
 					var adr = [];
-					if (response[i].address.city && response[i].address.city.toSource() != '({})') {
+					if (response[i].address.city && !isEmpty(response[i].address.city)) {
 						adr.push(response[i].address.city);
 					}
-					if (response[i].address.street && response[i].address.street.toSource() != '({})') {
+					if (response[i].address.street && !isEmpty(response[i].address.street)) {
 						adr.push(response[i].address.street);
 					}
-					if (response[i].address.building && response[i].address.building.toSource() != '({})') {
+					if (response[i].address.building && !isEmpty(response[i].address.building)) {
 						adr.push(response[i].address.building);
 					}
 					if (adr.length > 0) {
