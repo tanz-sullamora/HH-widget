@@ -47,6 +47,11 @@ function hhWidget(elementName, options) {
 		var item = document.createElement(elementType);
 		if (options) {
 			for (var o in options) {
+				if (o == 'placeholder' && !('placeholder' in item)) {
+					item.setAttribute('value', options[o]);
+					item.setAttribute('onfocus', 'this.value=this.value=="' + options[o] + '"?"":this.value');
+					item.setAttribute('onblur', 'this.value=this.value==""?"' + options[o] + '":this.value');
+				}
 				item.setAttribute(o, options[o]);
 			}
 		}
